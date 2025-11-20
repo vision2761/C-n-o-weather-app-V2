@@ -6,7 +6,7 @@ import pandas as pd
 import re
 from datetime import datetime
 
-from db import (
+from db_V2 import (
     init_db,
     insert_forecast,
     get_forecasts,
@@ -16,7 +16,7 @@ from db import (
     get_rain_events,
     get_rain_stats_by_day,
 )
-from metar_parser import parse_metar
+from metar_parser_V2 import parse_metar
 
 st.set_page_config(page_title="昆岛机场气象记录系统", layout="wide")
 
