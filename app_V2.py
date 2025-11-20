@@ -43,7 +43,7 @@ def page_forecast():
     with c4:
         temp_max = st.number_input("最高气温 (℃)", value=28.0, format="%.1f")
 
-    weather = st.text_input("天气现象（自由填写，如：分散对流伴短时阵雨）")
+    weather = st.text_input("天气现象（如：分散对流伴短时阵雨）")
 
     if st.button("保存预报记录"):
         if temp_max < temp_min:
