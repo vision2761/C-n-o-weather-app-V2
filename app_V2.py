@@ -134,15 +134,16 @@ def page_rain():
 
     st.subheader("记录降水变化节点")
 
-    # 日期 + 时间分栏输入
+    # 日期 + 手动时间输入
     c1, c2 = st.columns(2)
     with c1:
         date_val = st.date_input("日期")
     with c2:
-        time_val = st.time_input("时间（HH:MM）", value=time(0, 0), step=60)
-
+        time_input = st.text_input("时间（HH:MM，例如：12:06）")
+    
     # 合成最终时间格式
-    time_str = f"{date_val} {time_val.strftime('%H:%M')}"
+    time_str = f"{date_val} {time_input}"
+
 
     rain_level = st.selectbox(
         "雨强",
