@@ -134,17 +134,62 @@ def page_rain():
 
     st.subheader("记录降水变化节点")
 
-    # 日期 + 手动时间输入
+    # 日期选择
     c1, c2 = st.columns(2)
     with c1:
         date_val = st.date_input("日期")
     with c2:
-        time_input = st.text_input("时间（HH:MM，例如：12:06）")
-    
-    # 合成最终时间格式
-    time_str = f"{date_val} {time_input}"
+        time_raw = st.text_input(
+            "时间（可输入 1206 → 12:06，537 → 05:37，1737 → 17:37）"
+        )
 
+    # -------------------------------
+    # 智能时间解析函数
+    # -------------------------------
+    def parse_time_numeric(s):
+        s = s.strip()
 
+        # 必须全是数字
+        if not s.isdigit():
+            return None
+
+        # 根据长度判断格式
+        if len(s) == 4:      # HHMM
+            hh = s[:2]
+            mm = s[2:]
+        elif len(s) == 3:    # HMM
+            hh = "0" + s[0]
+            mm = s[1:]
+        elif len(s) == 2:    # MM
+            hh = "00"
+            mm = s
+        elif len(s) == 1:    # M
+            hh = "00"
+            mm = "0" + s
+        else:
+            return None
+
+        # 校验数值范围
+        try:
+            hh_i = int(hh)
+            mm_i = int(mm)
+            if not (0 <= hh_i <= 23 and 0 <= mm_i <= 59):
+                return None
+        except:
+            return None
+
+        return f"{hh}:{mm}"
+
+    # 转换时间
+    time_hhmm = parse_time_numeric(time_raw)
+    if time_hhmm:
+        time_str = f"{date_val} {time_hhmm}"
+    else:
+        time_str = None
+
+    # --------------------------------------
+    # 雨强选择
+    # --------------------------------------
     rain_level = st.selectbox(
         "雨强",
         ["毛毛雨", "小雨", "中雨", "大雨", "暴雨", "雷阵雨", "雨停"],
@@ -153,13 +198,13 @@ def page_rain():
     rain_code = st.text_input("对应报文代码（如 -RA、RA、+RA、TSRA 等，可选）")
     note = st.text_input("备注（可选）")
 
+    # 保存按钮
     if st.button("保存记录"):
-        try:
-            datetime.strptime(time_str, "%Y-%m-%d %H:%M")
+        if not time_str:
+            st.error("时间格式错误，请输入 1206 / 537 / 1737 / 06 等数字格式")
+        else:
             insert_rain_event(time_str, rain_level, rain_code, note)
             st.success(f"记录成功：{time_str} — {rain_level}")
-        except:
-            st.error("时间格式错误，应为 YYYY-MM-DD HH:MM")
 
     st.markdown("---")
     st.subheader("📑 历史降水过程查询（含降雨强度图）")
@@ -199,6 +244,7 @@ def page_rain():
 
         st.line_chart(df_chart["强度"], height=280)
         st.caption("📈 上图为降水强度随时间变化趋势（雨停强度为0）")
+
 
 # ============================================================
 #  4）历史分析
@@ -242,7 +288,7 @@ def main():
         page_metar()
     elif page == "降水记录":
         page_rain()
-    elif page == "历史分析":  
+    elif page == "历史分析":
         page_analysis()
 
 if __name__ == "__main__":
